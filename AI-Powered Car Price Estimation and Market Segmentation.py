@@ -102,7 +102,7 @@ df['brand'] = df['brand'].apply(lambda x : ' '.join(x))
 df['unique_model_number'] = df['unique_model_number'].apply(lambda y: ' '.join(y))
 
 print("Lets see the Updated data sheet after the making this new columns.........\n")
-df.head()
+df.head()   
 
 print("Lets Drope the Unwanted Name Column from the datasheets and see the updated datasets.......\n")
 
@@ -144,10 +144,10 @@ categorical_cols = ['brand', 'unique_model_number', 'fuel',
                     'transmission', 'owner', 'seller_type']
 
 encoders = {}
-for col in categorical_cols:
+for i in categorical_cols:
     le = LabelEncoder()
-    df[col] = le.fit_transform(df[col])
-    encoders[col] = le
+    df[i] = le.fit_transform(df[i])
+    encoders[i] = le
 
 print("Encoded Sample:\n")
 df.head()
@@ -343,4 +343,3 @@ plt.ylim(0, 100)
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.savefig("R2_score_comparission.jpg",dpi=400,bbox_inches='tight')
 plt.show()
-
