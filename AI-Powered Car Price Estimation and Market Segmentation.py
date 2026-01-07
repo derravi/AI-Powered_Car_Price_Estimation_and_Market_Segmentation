@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder,OrdinalEncoder,StandardScaler
+from sklearn.preprocessing import LabelEncoder,StandardScaler
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
@@ -7,11 +7,11 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error,mean_squared_error,r2_score,accuracy_score,classification_report
 from sklearn.tree import DecisionTreeRegressor
 import numpy as np
+import pickle
 from xgboost import XGBRegressor
-
 #Data load
 print("Lets Load the Datasheet........\n")
-df = pd.read_csv("CAR DETAILS FROM CAR DEKHO.csv")
+df = pd.read_csv("Data Sheet/CAR DETAILS FROM CAR DEKHO.csv")
 
 #Check The Rows And Columns of the Datasets.
 def shape():
@@ -41,14 +41,14 @@ plt.xlabel("Fuel Type")
 plt.ylabel("Average Selling Price (₹)")
 plt.xticks(rotation=0)
 plt.grid(True,color="grey")
-plt.savefig("Average_vs_fuel.jpg",dpi=400,bbox_inches='tight')
+plt.savefig("Graph images/Average_vs_fuel.jpg",dpi=400,bbox_inches='tight')
 plt.show()
 
 plt.figure(figsize=(6,5))
 df['transmission'].value_counts().plot(kind='pie', autopct='%1.1f%%', startangle=90, colors=['skyblue', 'blue'])
 plt.title("Percentage of Transmission Types")
 plt.ylabel("")
-plt.savefig("Transmission_types.jpg",dpi=400,bbox_inches='tight')
+plt.savefig("Graph images/Transmission_types.jpg",dpi=400,bbox_inches='tight')
 plt.show()
 
 #Relationship Between KM Driven and Selling Price
@@ -59,7 +59,7 @@ plt.title("Relationship between KM Driven and Selling Price")
 plt.xlabel("KM Drive (KM)")
 plt.ylabel("Selling Price (₹)")
 plt.grid(True,color="grey")
-plt.savefig("KM_Driven_and_Selling_Price.jpg",dpi=400,bbox_inches='tight')
+plt.savefig("Graph images/KM_Driven_and_Selling_Price.jpg",dpi=400,bbox_inches='tight')
 plt.show()
 
 print("Line Chart: Average Car Price vs KM Driven...\n")
@@ -78,7 +78,7 @@ plt.ylabel("Average Selling Price (₹)")
 plt.xticks(rotation=45)
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.tight_layout()
-plt.savefig("Average_Price_vs_KMDriven.png", dpi=400, bbox_inches='tight')
+plt.savefig("Graph images/Average_Price_vs_KMDriven.png", dpi=400, bbox_inches='tight')
 plt.show()
 
 #Lets use some encoding technique to encode the Labeled data from the datasets.
@@ -102,7 +102,7 @@ df['brand'] = df['brand'].apply(lambda x : ' '.join(x))
 df['unique_model_number'] = df['unique_model_number'].apply(lambda y: ' '.join(y))
 
 print("Lets see the Updated data sheet after the making this new columns.........\n")
-df.head()   
+df.head()
 
 print("Lets Drope the Unwanted Name Column from the datasheets and see the updated datasets.......\n")
 
@@ -262,6 +262,7 @@ print("R2 Score : ",(r2_score(y_test,y_predict_xgb))*100,"%")
 
 df.head()
 
+
 #User Input.
 print("Lets Get the User Input and predict the Car Price for each model............\n")
 
@@ -294,11 +295,11 @@ user_data = {
 
 data = pd.DataFrame([user_data])
 
-for col in categorical_cols:
-    if data[col][0] in encoders[col].classes_:
-        data[col] = encoders[col].transform(data[col])
+for i in categorical_cols:
+    if data[i][0] in encoders[i].classes_:
+        data[i] = encoders[i].transform(data[i])
     else:
-        data[col] = -1
+        data[i] = -1
 
 user_scaled = scaler.transform(data)
 
@@ -314,6 +315,22 @@ print(f"Using Decision Tree Regressor, Predicted Price: ₹{round(pred_dtr,2)}\n
 print(f"Using XGBoost, Predicted Price: ₹{round(predicted_price_xgboost,2)}\n")
 
 
+#make the pickle models for Fast APIs
+
+print("Lets make the Pickle model for FAST APIs Endpoin.........\n")
+
+model = {
+    "encoders":encoders,
+    "Label_encoder":le,
+    "Standard_scaler":scaler,
+    "LinearRegression":lr,
+    "Decision_tree":dtrm,
+    "XGBoost":xgb
+}
+
+with open("models/models.pkl",'wb') as f:
+    pickle.dump(model,f)
+
 #Shows overall distribution of car prices in the dataset.
 print("Shows overall distribution of car prices in the dataset........\n")
 plt.figure(figsize=(8,5))
@@ -322,7 +339,7 @@ plt.title("Distribution of Car Selling Prices")
 plt.xlabel("Selling Price (in ₹)")
 plt.ylabel("Number of Cars")
 plt.grid(True, linestyle='--', alpha=0.6)
-plt.savefig("Distribution_of_Car_Selling_Prices.jpg",dpi=400,bbox_inches='tight')
+plt.savefig("Graph images/Distribution_of_Car_Selling_Prices.jpg",dpi=400,bbox_inches='tight')
 plt.show()
 
 #Visualize how well each ML model performs (R² score).
@@ -341,5 +358,6 @@ plt.xlabel("R² Score")
 plt.ylabel("Models")
 plt.ylim(0, 100)
 plt.grid(True, linestyle='--', alpha=0.6)
-plt.savefig("R2_score_comparission.jpg",dpi=400,bbox_inches='tight')
+plt.savefig("Graph images/R2_score_comparission.jpg",dpi=400,bbox_inches='tight')
 plt.show()
+

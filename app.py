@@ -4,23 +4,28 @@ import pickle
 import pandas as pd
 from schema.pydentic_model import UserInput
 
-with open('models/models.pkl','rb') as f:
-    model = pickle.dump(model,f)
+with open('models/models.pkl', 'rb') as f:
+    model = pickle.load(f)                    
 
-# label_encoder = model["Label_encoder"]
-# scaler  = model["Standard_scaler"]
-# linear_model  = model["LinearRegression"]
-# decision_tree  = model["Decision_tree"]
-# xgboost_model  = model["XGBoost"]
+encoders = model["encoders"]                  
+scaler = model["Standard_scaler"]             
+lr = model["LinearRegression"]                 
+dtrm = model["Decision_tree"]                 
+xgb = model["XGBoost"]                         
 
-app =FastAPI(title="AI-Powered Car Price Estimation and Market Segmentation",description="Predict car prices using Linear Regression, Decision Tree, and XGBoost models.")
+
+app = FastAPI(
+    title="AI-Powered Car Price Estimation and Market Segmentation",
+    description="Predict car prices using Linear Regression, Decision Tree, and XGBoost models."
+)
 
 @app.get("/")
 def demo():
-    return {"message":"AI-Powered Car Price Estimation and Market Segmentation"}
+    return {"message": "AI-Powered Car Price Estimation and Market Segmentation"}
+
 
 @app.post("/predict")
-def predict_car_price(data:UserInput):
+def predict_car_price(data: UserInput):
 
     df = pd.DataFrame([{
         "brand": data.brand,
@@ -33,23 +38,32 @@ def predict_car_price(data:UserInput):
         "seller_type": data.seller_type
     }])
 
-    temp=["brand", "unique_model_number", "fuel", "transmission", "owner", "seller_type"]
+    categorical_cols = [
+        "brand",
+        "unique_model_number",
+        "fuel",
+        "transmission",
+        "owner",
+        "seller_type"
+    ]
 
-    #Encode the Labeled Data
-    for i in temp:
-        df[i] = label_encoder.transform(df[i])
+    for col in categorical_cols:
+        if df[col].iloc[0] in encoders[col].classes_:   
+            df[col] = encoders[col].transform(df[col])  
+        else:
+            df[col] = -1                               
 
-    #Resclae the Hall User Input data
-    scaled_data = scaler.transform(df)
+    scaled_data = scaler.transform(df)    
 
-    #Predict the all model Values
+    predict_lr = float(lr.predict(scaled_data)[0])      
+    predict_dtree = float(dtrm.predict(df)[0])           
+    predict_xgboost = float(xgb.predict(df)[0])          
 
-    predict_lr = linear_model.predict(scaled_data)[0]
-    predict_dtree = decision_tree.predict(scaled_data)[0]
-    predict_xgboost = xgboost_model.predict(scaled_data)[0]
-
-    return JSONResponse(status_code=200,content={
-        "LinearRegression_Price":predict_lr,
-        "DecisionTree_Price":predict_dtree,
-        "XGBoost_Price":predict_xgboost
-    })
+    return JSONResponse(
+        status_code=200,
+        content={
+            "LinearRegression_Price": round(predict_lr, 2),
+            "DecisionTree_Price": round(predict_dtree, 2),
+            "XGBoost_Price": round(predict_xgboost, 2)
+        }
+    )
