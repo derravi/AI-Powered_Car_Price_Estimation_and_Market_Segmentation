@@ -1,12 +1,12 @@
 FROM python:3.13.7
 
-RUN mkdir -p /AI_Powered_Car_Price_Estimation_and_Market_Segmentation
+RUN mkdir -p /ai_powered_car_price_estimation_and_market_segmentation
 
-WORKDIR /AI_Powered_Car_Price_Estimon_and_Market_Segmentation
+WORKDIR /ai_powered_car_price_estimation_and_market_segmentation
 
-COPY . /AI_Powered_Car_Price_Estimation_and_Market_Segmentation
+COPY . /ai_powered_car_price_estimation_and_market_segmentation
 
-RUN pip install -r requirement.txt
+RUN pip install -r requirements.txt
 
 ENV PORT=8000
 
