@@ -4,6 +4,7 @@ import pickle
 import pandas as pd
 from schema.pydentic_model import UserInput
 
+#Impotr PKL file
 with open('models/models.pkl', 'rb') as f:
     model = pickle.load(f)                    
 
@@ -13,17 +14,17 @@ lr = model["LinearRegression"]
 dtrm = model["Decision_tree"]                 
 xgb = model["XGBoost"]                         
 
-
+#main api app name
 app = FastAPI(
     title="AI-Powered Car Price Estimation and Market Segmentation",
     description="Predict car prices using Linear Regression, Decision Tree, and XGBoost models."
 )
-
+#checking API
 @app.get("/")
 def demo():
     return {"message": "AI-Powered Car Price Estimation and Market Segmentation"}
 
-
+#Prediction API Pipeline for ML Model
 @app.post("/predict")
 def predict_car_price(data: UserInput):
 
